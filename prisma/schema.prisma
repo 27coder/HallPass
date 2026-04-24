@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  password String
+  role     String
+  teacherId String?
+  teacher  User?   @relation("TeacherStudents", fields: [teacherId], references: [id])
+  students User[]  @relation("TeacherStudents")
+  passes   Pass[]
+  approvedPasses Pass[] @relation("PassApprover")
+}
+
+model Pass {
+  id         String   @id @default(cuid())
+  studentId  String
+  student    User     @relation(fields: [studentId], references: [id])
+  fromRoom   String
+  to         String
+  notes      String?
+  status     String   @default("pending")
+  approvedAt DateTime?
+  returnedAt DateTime?
+  teacherId  String?
+  teacher    User?    @relation("PassApprover", fields: [teacherId], references: [id])
+}
