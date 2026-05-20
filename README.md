@@ -15,12 +15,16 @@ A school hall pass management system with three user roles: Admin, Teacher, and 
 2. Set up a PostgreSQL database (e.g., using Supabase for a free tier).
 3. Update `.env.local` with your `DATABASE_URL`.
 4. Run database migrations: `npx prisma db push`
-5. Run the development server: `npm run dev`
+5. Seed the demo accounts: `npm run seed`
+6. Run the development server: `npm run dev`
 
 ## Usage
 
 - Access the application at http://localhost:3000
-- Log in with appropriate credentials based on role.
+- Log in with the demo credentials:
+  - Admin: `admin@example.com` / `admin123`
+  - Teacher: `teacher@example.com` / `teacher123`
+  - Student: `student@example.com` / `student123`
 
 ## Technologies
 
