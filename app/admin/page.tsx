@@ -1,6 +1,7 @@
 'use client'
 
 import { useSession, signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 interface Pass {
@@ -16,6 +17,7 @@ interface Pass {
 
 export default function AdminDashboard() {
   const { data: session } = useSession()
+  const router = useRouter()
   const [passes, setPasses] = useState<Pass[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -74,6 +76,11 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleLogout = async () => {
+    await signOut({ redirect: false, callbackUrl: '/login' })
+    router.push('/login')
+  }
+
   const stats = {
     total: passes.length,
     pending: passes.filter((p: Pass) => p.status === 'pending').length,
@@ -91,7 +98,7 @@ export default function AdminDashboard() {
             <p className="text-gray-600 mt-1">Welcome, {session?.user?.name}</p>
           </div>
           <button
-            onClick={() => signOut()}
+            onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold transition"
           >
             Logout
