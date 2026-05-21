@@ -130,3 +130,4 @@ export const authOptions = {
     strategy: 'jwt' as const
   }
 }
+
