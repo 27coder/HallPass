@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
   const pass = await prisma.pass.create({
     data: {
       studentId: student.id,
+      teacherId: student.teacherId ?? undefined,
       fromRoom: sanitizedFromRoom,
       to: sanitizedTo,
       notes: sanitizedNotes,
