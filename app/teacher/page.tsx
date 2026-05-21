@@ -13,6 +13,17 @@ interface Pass {
   approvedAt?: string
 }
 
+function escapeHtml(text: string): string {
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  }
+  return text.replace(/[&<>"']/g, (char) => map[char])
+}
+
 export default function TeacherDashboard() {
   const { data: session } = useSession()
   const [pendingPasses, setPendingPasses] = useState<Pass[]>([])
@@ -69,7 +80,7 @@ export default function TeacherDashboard() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-800">Teacher Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome, {session?.user?.name}</p>
+            <p className="text-gray-600 mt-1">Welcome, {escapeHtml(session?.user?.name || '')}</p>
           </div>
           <button
             onClick={() => signOut()}
@@ -95,12 +106,12 @@ export default function TeacherDashboard() {
                     key={pass.id}
                     className="border-2 border-yellow-200 bg-yellow-50 rounded-lg p-4"
                   >
-                    <p className="font-semibold text-gray-800">{pass.student.name}</p>
+                    <p className="font-semibold text-gray-800">{escapeHtml(pass.student.name)}</p>
                     <p className="text-sm text-gray-600">
-                      From <strong>Room {pass.fromRoom}</strong> → <strong>{pass.to}</strong>
+                      From <strong>Room {escapeHtml(pass.fromRoom)}</strong> → <strong>{escapeHtml(pass.to)}</strong>
                     </p>
                     {pass.notes && (
-                      <p className="text-sm text-gray-600 mt-2">Reason: {pass.notes}</p>
+                      <p className="text-sm text-gray-600 mt-2">Reason: {escapeHtml(pass.notes)}</p>
                     )}
                     <div className="flex gap-2 mt-4">
                       <button
@@ -138,9 +149,9 @@ export default function TeacherDashboard() {
                     key={pass.id}
                     className="border-2 border-green-200 bg-green-50 rounded-lg p-4"
                   >
-                    <p className="font-semibold text-gray-800">{pass.student.name}</p>
+                    <p className="font-semibold text-gray-800">{escapeHtml(pass.student.name)}</p>
                     <p className="text-sm text-gray-600">
-                      From <strong>Room {pass.fromRoom}</strong> → <strong>{pass.to}</strong>
+                      From <strong>Room {escapeHtml(pass.fromRoom)}</strong> → <strong>{escapeHtml(pass.to)}</strong>
                     </p>
                     <div className="flex justify-between items-center mt-3">
                       <span className="badge badge-approved text-sm">

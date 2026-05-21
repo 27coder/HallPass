@@ -14,6 +14,17 @@ interface Pass {
   approvedAt?: string
 }
 
+function escapeHtml(text: string): string {
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  }
+  return text.replace(/[&<>"']/g, (char) => map[char])
+}
+
 export default function AdminDashboard() {
   const { data: session } = useSession()
   const [passes, setPasses] = useState<Pass[]>([])
@@ -59,26 +70,21 @@ export default function AdminDashboard() {
   }
 
   const getStatusBadge = (status: string) => {
-    const baseClasses = 'badge'
-    switch (status) {
-      case 'pending':
-        return <span className={`${baseClasses} badge-pending`}>⏳ Pending</span>
-      case 'approved':
-        return <span className={`${baseClasses} badge-approved`}>✓ Approved</span>
-      case 'denied':
-        return <span className={`${baseClasses} badge-denied`}>✗ Denied</span>
-      case 'returned':
-        return <span className={`${baseClasses} badge-returned`}>↩ Returned</span>
-      default:
-        return <span className={baseClasses}>{status}</span>
+    // Only allow known statuses to prevent injection
+    const statusMap: { [key: string]: JSX.Element } = {
+      'pending': <span className="badge badge-pending">⏳ Pending</span>,
+      'approved': <span className="badge badge-approved">✓ Approved</span>,
+      'denied': <span className="badge badge-denied">✗ Denied</span>,
+      'returned': <span className="badge badge-returned">↩ Returned</span>,
     }
+    return statusMap[status] || <span className="badge">{status}</span>
   }
 
   const stats = {
     total: passes.length,
-    pending: passes.filter(p => p.status === 'pending').length,
-    approved: passes.filter(p => p.status === 'approved').length,
-    denied: passes.filter(p => p.status === 'denied').length,
+    pending: passes.filter((p: Pass) => p.status === 'pending').length,
+    approved: passes.filter((p: Pass) => p.status === 'approved').length,
+    denied: passes.filter((p: Pass) => p.status === 'denied').length,
   }
 
   return (
@@ -88,7 +94,7 @@ export default function AdminDashboard() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-800">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome, {session?.user?.name}</p>
+            <p className="text-gray-600 mt-1">Welcome, {escapeHtml(session?.user?.name || '')}</p>
           </div>
           <button
             onClick={() => signOut()}
@@ -137,14 +143,14 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {passes.map(pass => (
+                  {passes.map((pass: Pass) => (
                     <tr key={pass.id} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 font-semibold text-gray-800">{pass.student.name}</td>
+                      <td className="px-4 py-3 font-semibold text-gray-800">{escapeHtml(pass.student.name)}</td>
                       <td className="px-4 py-3 text-gray-600">
-                        Room {pass.fromRoom} → {pass.to}
+                        Room {escapeHtml(pass.fromRoom)} → {escapeHtml(pass.to)}
                       </td>
-                      <td className="px-4 py-3 text-gray-600 text-sm">{pass.notes || '—'}</td>
-                      <td className="px-4 py-3 text-gray-600">{pass.teacher?.name || '—'}</td>
+                      <td className="px-4 py-3 text-gray-600 text-sm">{pass.notes ? escapeHtml(pass.notes) : '—'}</td>
+                      <td className="px-4 py-3 text-gray-600">{pass.teacher?.name ? escapeHtml(pass.teacher.name) : '—'}</td>
                       <td className="px-4 py-3">
                         {getStatusBadge(pass.status)}
                         {pass.status === 'approved' && pass.approvedAt && (

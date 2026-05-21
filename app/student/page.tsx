@@ -13,6 +13,17 @@ interface Pass {
   returnedAt?: string
 }
 
+function escapeHtml(text: string): string {
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  }
+  return text.replace(/[&<>"']/g, (char) => map[char])
+}
+
 export default function StudentDashboard() {
   const { data: session } = useSession()
   const [passes, setPasses] = useState<Pass[]>([])
@@ -20,6 +31,7 @@ export default function StudentDashboard() {
   const [to, setTo] = useState('')
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     fetchPasses()
@@ -33,6 +45,7 @@ export default function StudentDashboard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
     setLoading(true)
     const res = await fetch('/api/passes', {
       method: 'POST',
@@ -45,23 +58,21 @@ export default function StudentDashboard() {
       setTo('')
       setNotes('')
       fetchPasses()
+    } else {
+      const data = await res.json()
+      setError(data.error || 'Failed to create pass')
     }
   }
 
   const getStatusBadge = (status: string) => {
-    const baseClasses = 'badge'
-    switch (status) {
-      case 'pending':
-        return <span className={`${baseClasses} badge-pending`}>⏳ Pending</span>
-      case 'approved':
-        return <span className={`${baseClasses} badge-approved`}>✓ Approved</span>
-      case 'denied':
-        return <span className={`${baseClasses} badge-denied`}>✗ Denied</span>
-      case 'returned':
-        return <span className={`${baseClasses} badge-returned`}>↩ Returned</span>
-      default:
-        return <span className={baseClasses}>{status}</span>
+    // Only allow known statuses
+    const statusMap: { [key: string]: JSX.Element } = {
+      'pending': <span className="badge badge-pending">⏳ Pending</span>,
+      'approved': <span className="badge badge-approved">✓ Approved</span>,
+      'denied': <span className="badge badge-denied">✗ Denied</span>,
+      'returned': <span className="badge badge-returned">↩ Returned</span>,
     }
+    return statusMap[status] || <span className="badge">{status}</span>
   }
 
   return (
@@ -71,7 +82,7 @@ export default function StudentDashboard() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-800">Student Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome, {session?.user?.name}</p>
+            <p className="text-gray-600 mt-1">Welcome, {escapeHtml(session?.user?.name || '')}</p>
           </div>
           <button
             onClick={() => signOut()}
@@ -84,6 +95,11 @@ export default function StudentDashboard() {
         {/* Request Form Card */}
         <div className="card mb-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Request Hall Pass</h2>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+              {escapeHtml(error)}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="label-text">From Room #</label>
@@ -141,13 +157,13 @@ export default function StudentDashboard() {
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <p className="text-sm text-gray-600">Room {pass.fromRoom} → {pass.to}</p>
-                      <p className="font-semibold text-gray-800 text-lg mt-1">{pass.to}</p>
+                      <p className="text-sm text-gray-600">Room {escapeHtml(pass.fromRoom)} → {escapeHtml(pass.to)}</p>
+                      <p className="font-semibold text-gray-800 text-lg mt-1">{escapeHtml(pass.to)}</p>
                     </div>
                     {getStatusBadge(pass.status)}
                   </div>
                   {pass.notes && (
-                    <p className="text-gray-600 text-sm mb-2">Reason: {pass.notes}</p>
+                    <p className="text-gray-600 text-sm mb-2">Reason: {escapeHtml(pass.notes)}</p>
                   )}
                   <div className="text-xs text-gray-500 space-y-1">
                     {pass.approvedAt && (
