@@ -1,6 +1,7 @@
 'use client'
 
 import { useSession, signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 interface Pass {
@@ -26,6 +27,7 @@ function escapeHtml(text: string): string {
 
 export default function TeacherDashboard() {
   const { data: session } = useSession()
+  const router = useRouter()
   const [pendingPasses, setPendingPasses] = useState<Pass[]>([])
   const [activePasses, setActivePasses] = useState<Pass[]>([])
   const [loading, setLoading] = useState(false)
@@ -73,6 +75,11 @@ export default function TeacherDashboard() {
     return `${minutes} min`
   }
 
+  const handleLogout = async () => {
+    await signOut({ redirect: false, callbackUrl: '/login' })
+    router.push('/login')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-6xl mx-auto">
@@ -83,7 +90,7 @@ export default function TeacherDashboard() {
             <p className="text-gray-600 mt-1">Welcome, {escapeHtml(session?.user?.name || '')}</p>
           </div>
           <button
-            onClick={() => signOut()}
+            onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold transition"
           >
             Logout
