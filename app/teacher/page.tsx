@@ -34,14 +34,16 @@ export default function TeacherDashboard() {
 
   useEffect(() => {
     fetchPasses()
+    const interval = setInterval(fetchPasses, 5000)
+    return () => clearInterval(interval)
   }, [])
 
   const fetchPasses = async () => {
-    const res = await fetch('/api/passes?status=pending')
+    const res = await fetch('/api/passes?status=pending', { cache: 'no-store' })
     const data = await res.json()
     setPendingPasses(data)
 
-    const res2 = await fetch('/api/passes?status=approved')
+    const res2 = await fetch('/api/passes?status=approved', { cache: 'no-store' })
     const data2 = await res2.json()
     setActivePasses(data2)
   }

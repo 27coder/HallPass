@@ -37,10 +37,12 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     fetchPasses()
+    const interval = setInterval(fetchPasses, 5000)
+    return () => clearInterval(interval)
   }, [])
 
   const fetchPasses = async () => {
-    const res = await fetch('/api/passes')
+    const res = await fetch('/api/passes', { cache: 'no-store' })
     const data = await res.json()
     setPasses(data)
   }
