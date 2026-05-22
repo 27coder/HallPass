@@ -48,23 +48,56 @@ export default function TeacherDashboard() {
 
   const handleApprove = async (id: string) => {
     setLoading(true)
-    await fetch(`/api/passes/${id}/approve`, { method: 'PUT' })
-    setLoading(false)
-    fetchPasses()
+    try {
+      const res = await fetch(`/api/passes/${id}/approve`, { method: 'PUT' })
+      if (!res.ok) {
+        const error = await res.json()
+        alert(`Error approving pass: ${error.error || 'Unknown error'}`)
+        return
+      }
+      await fetchPasses()
+    } catch (err) {
+      alert('Error approving pass. Please try again.')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDeny = async (id: string) => {
     setLoading(true)
-    await fetch(`/api/passes/${id}/deny`, { method: 'PUT' })
-    setLoading(false)
-    fetchPasses()
+    try {
+      const res = await fetch(`/api/passes/${id}/deny`, { method: 'PUT' })
+      if (!res.ok) {
+        const error = await res.json()
+        alert(`Error denying pass: ${error.error || 'Unknown error'}`)
+        return
+      }
+      await fetchPasses()
+    } catch (err) {
+      alert('Error denying pass. Please try again.')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleReturn = async (id: string) => {
     setLoading(true)
-    await fetch(`/api/passes/${id}/return`, { method: 'PUT' })
-    setLoading(false)
-    fetchPasses()
+    try {
+      const res = await fetch(`/api/passes/${id}/return`, { method: 'PUT' })
+      if (!res.ok) {
+        const error = await res.json()
+        alert(`Error returning pass: ${error.error || 'Unknown error'}`)
+        return
+      }
+      await fetchPasses()
+    } catch (err) {
+      alert('Error returning pass. Please try again.')
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const getTimeSince = (approvedAt: string) => {

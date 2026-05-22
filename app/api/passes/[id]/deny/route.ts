@@ -11,12 +11,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 
   // Validate ID format
-  const id = sanitizeRoomCode(params.id).slice(0, 25)
+  const id = params.id
   if (!id || id.length < 5) {
     return NextResponse.json({ error: 'Invalid pass ID' }, { status: 400 })
   }
 
-  const pass = await prisma.pass.findUnique({ where: { id: params.id } })
+  const pass = await prisma.pass.findUnique({ where: { id: id } })
   if (!pass || pass.status !== 'pending') {
     return NextResponse.json({ error: 'Invalid pass' }, { status: 400 })
   }
@@ -30,9 +30,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 
   await prisma.pass.update({
-    where: { id: params.id },
+    where: { id: id },
     data: { status: 'denied', teacherId: session.user.id }
   })
 
-  return NextResponse.json({ message: 'Pass denied' })
+  return NextResponse.json({ message: 'Pass denied' }, { status: 200 })
 }
